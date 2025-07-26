@@ -1,0 +1,60 @@
+import spacy
+import random
+import tkinter as tk
+from tkinter import scrolledtext
+
+# Load spaCy NLP model
+nlp = spacy.load("en_core_web_sm")
+
+# Sample Responses
+responses = {
+    "greeting": ["Hello!", "Hi there!", "Hey! How can I help you?"],
+    "goodbye": ["Goodbye!", "See you later!", "Have a nice day!"],
+    "thanks": ["You're welcome!", "No problem!", "Glad I could help!"],
+    "name": ["I'm your chatbot assistant.", "You can call me ChatBot."],
+}
+
+# Intent detection
+def get_intent(user_input):
+    doc = nlp(user_input.lower())
+    if any(token.lemma_ in ["hello", "hi", "hey"] for token in doc):
+        return "greeting"
+    elif any(token.lemma_ in ["bye", "goodbye", "see"] for token in doc):
+        return "goodbye"
+    elif "thank" in user_input.lower():
+        return "thanks"
+    elif "name" in user_input.lower():
+        return "name"
+    else:
+        return "unknown"
+
+# Response generation
+def get_response(intent):
+if intent in responses:
+    return random.choice(responses[intent])
+return "I'm sorry, I didn't understand that."
+
+# Handle send button click
+def send_message():
+    user_input = entry.get()
+    if user_input.strip() == "":
+        return
+    chat_window.insert(tk.END, f"You: {user_input}\n")
+    entry.delete(0, tk.END)
+    intent = get_intent(user_input)
+    response = get_response(intent)
+    print(f"DEBUG: Intent={intent}, Response={response}")  # Debug output
+    chat_window.insert(tk.END, f"Bot: {response}\n\n")
+    chat_window.yview(tk.END)
+
+# GUI setup
+root = tk.Tk()
+root.title("Chatbot")
+chat_window = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20, font=("Arial", 12))
+chat_window.pack(padx=10, pady=10)
+chat_window.insert(tk.END, "Bot: Hello! Type something...\n\n")
+entry = tk.Entry(root, width=40, font=("Arial", 12))
+entry.pack(side=tk.LEFT, padx=10, pady=10)
+send_button = tk.Button(root, text="Send", command=send_message)
+send_button.pack(side=tk.LEFT, pady=10)
+root.mainloop()
